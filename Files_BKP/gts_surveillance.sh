@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Couleurs pour l'affichage
+# === Définir des couleurs pour les messages ===
 color_B="\033[1;34m"  # Bleu clair
 color_R="\033[1;31m"  # Rouge clair
 color_G="\033[1;32m"  # Vert clair
 reset_color="\033[0m"  # Réinitialisation des couleurs
 
-# Fonctions pour afficher des messages colorés
+# === Fonctions pour afficher des messages colorés ===
 show_message() {
     echo -e "${color_B}$1${reset_color}"
 }
@@ -68,24 +68,12 @@ while true; do
     echo
 
     case $choix in
-        1)
-            check_disk_space
-            ;;
-        2)
-            launch_htop
-            ;;
-        3)
-            list_processes
-            ;;
-		4)
-			check_memory_usage
-			;;			
-        5)
-            info_message "Sortie."
-            break
-            ;;
-        *)
-            error_message "Option invalide. Veuillez réessayer."
-            ;;
+        1) check_disk_space ;;
+        2) launch_htop ;;
+        3) list_processes ;;
+		4) check_memory_usage ;;			
+        5) info_message "Sortie." ; break ;;
+        *) error_message "Option invalide. Veuillez réessayer." ;;
     esac
+    echo
 done

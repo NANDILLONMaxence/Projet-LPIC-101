@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
       apt-get update -y && apt-get upgrade -y
       apt-get update -y
 
-      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential htop openssh-server parted curl sudo vim tree e2fsprogs sshfs
+      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs
 
       # === Add folders ===
       mkdir -p /etc/gts
@@ -48,6 +48,9 @@ Vagrant.configure("2") do |config|
       # === Add group and set permissions ===
       chmod 755 /etc/gts
 
+      # For writeonly on new_agents.txt
+      groupadd writeonly
+
       groupadd RH
       chgrp RH /etc/gts/gts_cron.sh
       chmod 750 /etc/gts/gts_cron.sh
@@ -55,10 +58,12 @@ Vagrant.configure("2") do |config|
       groupadd IT
       chgrp -R IT /etc/new_agents
       chmod 2750 /etc/new_agents
-      chmod 740 /etc/new_agents/new_agents.txt
+
+      chown root:writeonly /etc/new_agents/new_agents.txt
+      sudo chmod 1600 /etc/new_agents/new_agents.txt
+
       chgrp IT /etc/gts/gts_surveillance.sh
       chmod 750 /etc/gts/gts_surveillance.sh
-      usermod -aG IT vagrant
 
       echo '%IT ALL=(ALL:ALL) ALL' | sudo tee -a /etc/sudoers
 
@@ -67,12 +72,42 @@ Vagrant.configure("2") do |config|
       echo "adminesgi:@zerty2QWERTY" | chpasswd
       usermod -aG IT adminesgi
 
-      adduser --gecos "" --disabled-password --allow-bad-names agent_RH_1
-      echo "agent_RH_1:plume_souple-1" | chpasswd
-      usermod -aG RH agent_RH_1
+      adduser --gecos "" --disabled-password --allow-bad-names agent_RH-1
+      echo "agent_RH-1:plume_souple-1" | chpasswd
+      usermod -aG RH,writeonly agent_RH-1
+
+      chmod 764 /etc/doas.conf
+
+
+      # === Configuration des droits suplémentaires pour l'agent RH 1
+      echo"
+      # === Autoriser agent_RH-1 à créer des utilisateurs et des groupes ===
+      permit nopass agent_RH-1 cmd /usr/sbin/useradd
+      permit nopass agent_RH-1 cmd /usr/sbin/userdel
+      permit nopass agent_RH-1 cmd /usr/sbin/groupadd
+      permit nopass agent_RH-1 cmd /usr/sbin/groupdel
+      permit nopass agent_RH-1 cmd /usr/sbin/groupmod
+      permit nopass agent_RH-1 cmd /usr/sbin/usermod
+
+      # === Autoriser agent_RH-1 à affecter des utilisateurs aux groupes ===
+      permit nopass agent_RH-1 cmd /usr/sbin/gpasswd args -a
+      permit nopass agent_RH-1 cmd /usr/sbin/gpasswd args -d
+      permit nopass agent_RH-1 cmd /usr/sbin/gpasswd args -m
+
+      # === Autoriser agent_RH-1 à définir le quota d'utilisateurs ===
+      permit nopass agent_RH-1 cmd /usr/sbin/usermod args -u +s
+
+      # === Ne pas autoriser agent_RH-1 à supprimer des membres des groupes sudo ou IT ===
+      deny agent_RH-1 cmd /usr/sbin/gpasswd args -d sudo
+      deny agent_RH-1 cmd /usr/sbin/gpasswd args -d IT
+
+      # === Ne pas autoriser agent_RH-1 à supprimer les groupes sudo ou IT ===
+      deny agent_RH-1 cmd /usr/sbin/groupdel args sudo
+      deny agent_RH-1 cmd /usr/sbin/groupdel args IT
+      " | sudo tee -a /etc/doas.conf
 
       # === Enable password authentication for SSH ===
-      sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+      sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
       # === Configure second disk for /mnt/data_disk + montage automatique ===
       if [ $(lsblk | grep -c sdb) -eq 1 ]; then
@@ -111,6 +146,7 @@ Vagrant.configure("2") do |config|
    - vagrant ssh debian12
    - ssh agent-RH-1@192.168.60.200
    - ssh adminesgi@192.168.60.200
+   - vagrant ssh
    - ssh [user]@127.0.0.1 -p 2222
   MESSAGE
 end
