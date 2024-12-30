@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
 
     # === Add data disk (50GB) ===
     unless File.exist?("./data_disk.vdi")
-      vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 51200]
+      vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 10 * 1024]
     end
     vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", "./data_disk.vdi"]
   end
@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
       chgrp IT /etc/gts/gts_surveillance.sh
       chmod 750 /etc/gts/gts_surveillance.sh
 
-      echo '%IT ALL=(ALL:ALL) ALL' | sudo tee -a /etc/sudoers
+      echo '%IT ALL=(ALL:ALL) ALL' | tee -a /etc/sudoers
 
       # === Add users ===
       adduser --gecos "" --disabled-password adminesgi
@@ -76,36 +76,42 @@ Vagrant.configure("2") do |config|
       echo "agent_RH-1:plume_souple-1" | chpasswd
       usermod -aG RH,writeonly agent_RH-1
 
-      chmod 764 /etc/doas.conf
+      
 
 
       # === Configuration des droits suplémentaires pour l'agent RH 1
-      echo"
-      # === Autoriser agent_RH-1 à créer des utilisateurs et des groupes ===
-      permit nopass agent_RH-1 cmd /usr/sbin/useradd
-      permit nopass agent_RH-1 cmd /usr/sbin/userdel
-      permit nopass agent_RH-1 cmd /usr/sbin/groupadd
-      permit nopass agent_RH-1 cmd /usr/sbin/groupdel
-      permit nopass agent_RH-1 cmd /usr/sbin/groupmod
-      permit nopass agent_RH-1 cmd /usr/sbin/usermod
+      # Créer le fichier doas.conf s'il n'existe pas
+      if [ ! -f /etc/doas.conf ]; then
+        touch /etc/doas.conf
+      fi
+      chmod 640 /etc/doas.conf
+      
+      echo '# === Autoriser agent_RH-1 à gérer les utilisateurs et les groupes ===
+      permit nopass agent_RH-1 cmd useradd
+      permit nopass agent_RH-1 cmd userdel
+      permit nopass agent_RH-1 cmd groupadd
+      permit nopass agent_RH-1 cmd groupdel
+      permit nopass agent_RH-1 cmd groupmod
+      permit nopass agent_RH-1 cmd usermod
+      permit nopass agent_RH-1 cmd chpasswd
 
-      # === Autoriser agent_RH-1 à affecter des utilisateurs aux groupes ===
-      permit nopass agent_RH-1 cmd /usr/sbin/gpasswd args -a
-      permit nopass agent_RH-1 cmd /usr/sbin/gpasswd args -d
-      permit nopass agent_RH-1 cmd /usr/sbin/gpasswd args -m
+      # === Autoriser agent_RH-1 à gérer les groupes ===
+      permit nopass agent_RH-1 cmd gpasswd args -a
+      permit nopass agent_RH-1 cmd gpasswd args -d
+      permit nopass agent_RH-1 cmd gpasswd args -m
 
-      # === Autoriser agent_RH-1 à définir le quota d'utilisateurs ===
-      permit nopass agent_RH-1 cmd /usr/sbin/usermod args -u +s
+      # === Autoriser agent_RH-1 à définir le quota dutilisateurs ===
+      permit nopass agent_RH-1 cmd usermod args -u +s
 
-      # === Ne pas autoriser agent_RH-1 à supprimer des membres des groupes sudo ou IT ===
-      deny agent_RH-1 cmd /usr/sbin/gpasswd args -d sudo
-      deny agent_RH-1 cmd /usr/sbin/gpasswd args -d IT
-
-      # === Ne pas autoriser agent_RH-1 à supprimer les groupes sudo ou IT ===
-      deny agent_RH-1 cmd /usr/sbin/groupdel args sudo
-      deny agent_RH-1 cmd /usr/sbin/groupdel args IT
-      " | sudo tee -a /etc/doas.conf
-
+      # === Restrictions pour agent_RH-1 ===
+      deny agent_RH-1 cmd gpasswd args -d sudo
+      deny agent_RH-1 cmd gpasswd args -d IT
+      deny agent_RH-1 cmd groupdel args sudo
+      deny agent_RH-1 cmd groupdel args IT
+      
+      # === Autoriser root à exécuter des commandes sans mot de passe ===
+      permit nopass root' > /etc/doas.conf
+      
       # === Enable password authentication for SSH ===
       sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 

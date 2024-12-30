@@ -4,7 +4,7 @@
 color_B="\033[1;34m"  # Bleu clair
 color_R="\033[1;31m"  # Rouge clair
 color_G="\033[1;32m"  # Vert clair
-reset_color="\033[0m"  # Réinitialisation des couleurs
+reset_color="\033[0m" # Réinitialisation des couleurs
 
 # === Fonctions pour afficher des messages colorés ===
 show_message() {
@@ -29,7 +29,7 @@ create_user() {
         useradd -m "$username"
         echo "$username:$password" | chpasswd
         info_message "Utilisateur $username créé avec succès."
-        echo -e "$(date)\t$username\t$password" >> /etc/new_agents/new_agents.txt
+        echo -e "$(date)\t$username\t$password" >>/etc/new_agents/new_agents.txt
     fi
 }
 
@@ -82,7 +82,7 @@ set_user_quota() {
 configure_sudo() {
     read -p "Entrez le nom d'utilisateur : " username
     if id "$username" &>/dev/null; then
-        echo "$username ALL=(ALL) NOPASSWD: /bin/systemctl restart" >> /etc/sudoers.d/$username
+        echo "$username ALL=(ALL) NOPASSWD: /bin/systemctl restart" >>/etc/sudoers.d/$username
         chmod 440 /etc/sudoers.d/$username
         info_message "Accès sudo configuré pour $username."
     else
@@ -103,14 +103,17 @@ while true; do
     read -p "Choisissez une option : " choix
 
     case $choix in
-        1) create_user ;;
-        2) delete_user ;;
-        3) create_group ;;
-        4) assign_user_to_group ;;
-        5) set_user_quota ;;
-        6) configure_sudo ;;
-        7) info_message "Au revoir !"; break ;;
-        *) error_message "Option invalide. Veuillez réessayer." ;;
+    1) create_user ;;
+    2) delete_user ;;
+    3) create_group ;;
+    4) assign_user_to_group ;;
+    5) set_user_quota ;;
+    6) configure_sudo ;;
+    7)
+        info_message "Au revoir !"
+        break
+        ;;
+    *) error_message "Option invalide. Veuillez réessayer." ;;
     esac
     echo
 done
