@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
       apt-get update -y && apt-get upgrade -y
       apt-get update -y
 
-      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs
+      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2
 
       # === Add folders ===
       mkdir -p /etc/gts
@@ -76,8 +76,6 @@ Vagrant.configure("2") do |config|
       echo "agent_RH-1:plume_souple-1" | chpasswd
       usermod -aG RH,writeonly agent_RH-1
 
-      
-
 
       # === Configuration des droits suplémentaires pour l'agent RH 1
       # Créer le fichier doas.conf s'il n'existe pas
@@ -87,7 +85,7 @@ Vagrant.configure("2") do |config|
       chmod 640 /etc/doas.conf
       
       echo '# === Autoriser agent_RH-1 à gérer les utilisateurs et les groupes ===
-      permit nopass agent_RH-1 cmd useradd
+      permit nopass agent_RH-1 cmd adduser
       permit nopass agent_RH-1 cmd userdel
       permit nopass agent_RH-1 cmd groupadd
       permit nopass agent_RH-1 cmd groupdel
@@ -100,15 +98,24 @@ Vagrant.configure("2") do |config|
       permit nopass agent_RH-1 cmd gpasswd args -d
       permit nopass agent_RH-1 cmd gpasswd args -m
 
-      # === Autoriser agent_RH-1 à définir le quota dutilisateurs ===
-      permit nopass agent_RH-1 cmd usermod args -u +s
+      # === Autoriser agent_RH-1 à insérer du texte dans /etc/doas.conf ===
+      permit nopass agent_RH-1 cmd tee args -a /etc/doas.conf
+
+      # === Autoriser agent_RH-1 à configurer des quotas sur /home ===
+      permit nopass agent_RH-1 cmd setquota args * /home *
+      permit nopass agent_RH-1 cmd edquota args *
+      permit nopass agent_RH-1 cmd quotaon args /home
+      permit nopass agent_RH-1 cmd quotaoff args /home
+      permit nopass agent_RH-1 cmd repquota args /home
 
       # === Restrictions pour agent_RH-1 ===
       deny agent_RH-1 cmd gpasswd args -d sudo
       deny agent_RH-1 cmd gpasswd args -d IT
       deny agent_RH-1 cmd groupdel args sudo
       deny agent_RH-1 cmd groupdel args IT
-      
+      deny agent_RH-1 cmd chmod args 440 /etc/sudoers.d/root
+      deny agent_RH-1 cmd chmod args 440 /etc/sudoers.d/vagrant
+
       # === Autoriser root à exécuter des commandes sans mot de passe ===
       permit nopass root' > /etc/doas.conf
       

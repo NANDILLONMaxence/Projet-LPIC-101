@@ -26,8 +26,8 @@ create_user() {
         error_message "L'utilisateur $username existe déjà."
     else
         password=$(openssl rand -base64 12)
-        useradd -m "$username"
-        echo "$username:$password" | chpasswd
+        doas adduser "$username"
+        echo "$username:$password" | doas chpasswd
         info_message "Utilisateur $username créé avec succès."
         echo -e "$(date)\t$username\t$password" >>/etc/new_agents/new_agents.txt
     fi
@@ -37,7 +37,7 @@ create_user() {
 delete_user() {
     read -p "Entrez le nom d'utilisateur à supprimer : " username
     if id "$username" &>/dev/null; then
-        userdel -r "$username"
+        doas userdel -r "$username"
         info_message "Utilisateur $username supprimé avec succès."
     else
         error_message "L'utilisateur $username n'existe pas."
@@ -50,7 +50,7 @@ create_group() {
     if getent group "$groupname" &>/dev/null; then
         error_message "Le groupe $groupname existe déjà."
     else
-        groupadd "$groupname"
+        doas groupadd "$groupname"
         info_message "Groupe $groupname créé avec succès."
     fi
 }
@@ -60,7 +60,7 @@ assign_user_to_group() {
     read -p "Entrez le nom d'utilisateur : " username
     read -p "Entrez le nom du groupe : " groupname
     if id "$username" &>/dev/null && getent group "$groupname" &>/dev/null; then
-        usermod -aG "$groupname" "$username"
+        doas usermod -aG "$groupname" "$username"
         info_message "Utilisateur $username ajouté au groupe $groupname."
     else
         error_message "Utilisateur ou groupe non trouvé."
@@ -71,20 +71,22 @@ assign_user_to_group() {
 set_user_quota() {
     read -p "Entrez le nom d'utilisateur : " username
     if id "$username" &>/dev/null; then
-        setquota -u "$username" 2097152 2097152 0 0 /home
+        doas setquota -u "$username" 2097152 2097152 0 0 /home
         info_message "Quota de 2 Go défini pour l'utilisateur $username."
     else
         error_message "L'utilisateur $username n'existe pas."
     fi
 }
 
-# === Fonction pour configurer sudo ===
-configure_sudo() {
+# === Fonction pour configurer l'autorisation d'utiliser systmctl ===
+set_user_systemctl() {
     read -p "Entrez le nom d'utilisateur : " username
     if id "$username" &>/dev/null; then
-        echo "$username ALL=(ALL) NOPASSWD: /bin/systemctl restart" >>/etc/sudoers.d/$username
-        chmod 440 /etc/sudoers.d/$username
-        info_message "Accès sudo configuré pour $username."
+        echo " # === Autorise $username à gerer le service apache ===
+        permit nopass $username cmd systemctl args restart apache2
+        permit nopass $username cmd systemctl args start apache2
+        permit nopass $username cmd systemctl args stop apache2" | doas tee -a /etc/doas.conf
+        info_message "Accès systemctl configuré pour $username."
     else
         error_message "L'utilisateur $username n'existe pas."
     fi
@@ -98,7 +100,7 @@ while true; do
     echo "3. Créer un groupe"
     echo "4. Affecter un utilisateur à un groupe"
     echo "5. Définir un quota disque pour un utilisateur"
-    echo "6. Configurer sudo pour un utilisateur"
+    echo "6. Configurer la gestion du service Apache"
     echo "7. Quitter"
     read -p "Choisissez une option : " choix
 
@@ -108,11 +110,9 @@ while true; do
     3) create_group ;;
     4) assign_user_to_group ;;
     5) set_user_quota ;;
-    6) configure_sudo ;;
+    6) set_user_systemctl ;;
     7)
-        info_message "Au revoir !"
-        break
-        ;;
+        info_message "Sortie." ; break ;;
     *) error_message "Option invalide. Veuillez réessayer." ;;
     esac
     echo
