@@ -26,10 +26,10 @@ create_user() {
         error_message "L'utilisateur $username existe déjà."
     else
         password=$(openssl rand -base64 12)
-        doas adduser "$username"
+        doas adduser --disabled-password --allow-bad-names "$username"
         echo "$username:$password" | doas chpasswd
         info_message "Utilisateur $username créé avec succès."
-        echo -e "$(date)\t$username\t$password" >>/etc/new_agents/new_agents.txt
+        echo -e "$(date)\t$username\t$password" | doas tee -a /etc/new_agents/new_agents.txt > /dev/null
     fi
 }
 
@@ -37,8 +37,11 @@ create_user() {
 delete_user() {
     read -p "Entrez le nom d'utilisateur à supprimer : " username
     if id "$username" &>/dev/null; then
-        doas userdel -r "$username"
-        info_message "Utilisateur $username supprimé avec succès."
+        if doas userdel -r "$username" &>/dev/null; then
+            info_message "Utilisateur $username supprimé avec succès."
+        else
+            error_message "Une erreur s'est produite lors de la suppression de l'utilisateur $username."
+        fi
     else
         error_message "L'utilisateur $username n'existe pas."
     fi

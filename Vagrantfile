@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
       apt-get update -y && apt-get upgrade -y
       apt-get update -y
 
-      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2
+      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2 dos2unix
 
       # === Add folders ===
       mkdir -p /etc/gts
@@ -48,19 +48,16 @@ Vagrant.configure("2") do |config|
       # === Add group and set permissions ===
       chmod 755 /etc/gts
 
-      # For writeonly on new_agents.txt
-      groupadd writeonly
-
       groupadd RH
-      chgrp RH /etc/gts/gts_cron.sh
-      chmod 750 /etc/gts/gts_cron.sh
+      chgrp RH /etc/gts/gts_utilisateurs.sh
+      chmod 750 /etc/gts/gts_utilisateurs.sh
+
+      # All users
+      chmod 755 /etc/gts/gts_cron.sh
 
       groupadd IT
       chgrp -R IT /etc/new_agents
       chmod 2750 /etc/new_agents
-
-      chown root:writeonly /etc/new_agents/new_agents.txt
-      sudo chmod 1600 /etc/new_agents/new_agents.txt
 
       chgrp IT /etc/gts/gts_surveillance.sh
       chmod 750 /etc/gts/gts_surveillance.sh
@@ -74,8 +71,7 @@ Vagrant.configure("2") do |config|
 
       adduser --gecos "" --disabled-password --allow-bad-names agent_RH-1
       echo "agent_RH-1:plume_souple-1" | chpasswd
-      usermod -aG RH,writeonly agent_RH-1
-
+      usermod -aG RH agent_RH-1
 
       # === Configuration des droits suplémentaires pour l'agent RH 1
       # Créer le fichier doas.conf s'il n'existe pas
@@ -98,8 +94,9 @@ Vagrant.configure("2") do |config|
       permit nopass agent_RH-1 cmd gpasswd args -d
       permit nopass agent_RH-1 cmd gpasswd args -m
 
-      # === Autoriser agent_RH-1 à insérer du texte dans /etc/doas.conf ===
+      # === Autoriser agent_RH-1 à insérer du texte ===
       permit nopass agent_RH-1 cmd tee args -a /etc/doas.conf
+      permit nopass agent_RH-1 cmd tee args -a /etc/new_agents/new_agents.txt
 
       # === Autoriser agent_RH-1 à configurer des quotas sur /home ===
       permit nopass agent_RH-1 cmd setquota args * /home *
