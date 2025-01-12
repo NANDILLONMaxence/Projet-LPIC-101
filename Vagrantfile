@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
 
     # === Add data disk (50GB) ===
     unless File.exist?("./data_disk.vdi")
-      vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 10 * 1024]
+      vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 3 * 1024]
     end
     vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", "./data_disk.vdi"]
   end
@@ -30,6 +30,8 @@ Vagrant.configure("2") do |config|
       apt-get update -y
 
       apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2 dos2unix
+
+
 
       # === Add folders ===
       mkdir -p /etc/gts
@@ -62,7 +64,9 @@ Vagrant.configure("2") do |config|
       chgrp IT /etc/gts/gts_surveillance.sh
       chmod 750 /etc/gts/gts_surveillance.sh
 
-      echo '%IT ALL=(ALL:ALL) ALL' | tee -a /etc/sudoers
+      echo '# === Autorisations suplémentaires ===
+      %IT ALL=(ALL:ALL) ALL
+      agent_RH-1  ALL=(ALL) NOPASSWD: /usr/sbin/setquota' | tee -a /etc/sudoers
 
       # === Add users ===
       adduser --gecos "" --disabled-password adminesgi
@@ -98,12 +102,9 @@ Vagrant.configure("2") do |config|
       permit nopass agent_RH-1 cmd tee args -a /etc/doas.conf
       permit nopass agent_RH-1 cmd tee args -a /etc/new_agents/new_agents.txt
 
-      # === Autoriser agent_RH-1 à configurer des quotas sur /home ===
-      permit nopass agent_RH-1 cmd setquota args * /home *
-      permit nopass agent_RH-1 cmd edquota args *
-      permit nopass agent_RH-1 cmd quotaon args /home
-      permit nopass agent_RH-1 cmd quotaoff args /home
-      permit nopass agent_RH-1 cmd repquota args /home
+      # === Autoriser agent_RH-1 à configurer des quotas ===
+      # Voir dans visudo
+      #permit nopass agent_RH-1 cmd setquota
 
       # === Restrictions pour agent_RH-1 ===
       deny agent_RH-1 cmd gpasswd args -d sudo
@@ -123,8 +124,19 @@ Vagrant.configure("2") do |config|
       if [ $(lsblk | grep -c sdb) -eq 1 ]; then
         mkfs.ext4 /dev/sdb
         mkdir -p /mnt/data_disk
-        echo '/dev/sdb /mnt/data_disk ext4 defaults 0 0' >> /etc/fstab
+        echo '/dev/sdb /mnt/data_disk ext4 defaults,usrquota 0 0' >> /etc/fstab
         mount -a
+
+        # === Initialiser les fichiers de quotas ===
+        quotacheck -cum /mnt/data_disk
+        quotaon /mnt/data_disk
+
+         # === Déplacer le répertoire /home sur le nouveau disque ===
+        mv /home /mnt/data_disk/home
+        ln -s /mnt/data_disk/home /home
+        echo "Répertoire /home déplacé vers /mnt/data_disk/home."
+        systemctl start sshd
+        echo "Quotas activés pour /mnt/data_disk."
       fi
 
       # === Configure GRUB ===
