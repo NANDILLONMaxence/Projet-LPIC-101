@@ -144,8 +144,7 @@ while true; do
     4) assign_user_to_group ;;
     5) set_user_quota ;;
     6) set_user_systemctl ;;
-    7)
-        info_message "Sortie." ; break ;;
+    7) info_message "Sortie." ; exit 0 ;;
     *) error_message "Option invalide. Veuillez réessayer." ;;
     esac
     echo

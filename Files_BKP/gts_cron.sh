@@ -54,25 +54,20 @@ while true; do
 				1)
 					cmd="/etc/cron_script/cron_space_disk.sh" # Emplacement du script
 					schedule="0 9 * * *" # Exécution automatique à 9h tous les jours
-					echo
-					;;
+					echo ;;
 				2)
 					read -p "Entrez le chemin de votre fichier : " chemin
-					cmd="rm $chemin"
-					;;
+					cmd="rm $chemin" ;;
 				3)
 					read -p "Entrez votre commande personnalisée : " cmd
-					read -p "Votre fréquence (ex. * * * * *): " schedule
-					;;
+					read -p "Votre fréquence (ex. * * * * *): " schedule ;;
 				4)
 					show_message "Retour au menu"
-					continue
-					;;
-								
+					continue ;;
+	
 				*)
 					error_message "Commande invalide."
-					exit 1
-					;;
+					exit 1 ;;
 			esac
 
 			# Si l'utilisateur a choisi une commande autre que les options 3 ou 4, demander la fréquence
@@ -95,26 +90,19 @@ while true; do
 
 				case $frequence in
 					1)
-						schedule="0 0 * * *"
-						;;
+						schedule="0 0 * * *" ;;
 					2)
-						schedule="0 7 * * *"
-						;;
+						schedule="0 7 * * *" ;;
 					3)
-						schedule="0 12 * * *"
-						;;
+						schedule="0 12 * * *" ;;
 					4)
-						schedule="0 19 * * 5"
-						;;
+						schedule="0 19 * * 5" ;;
 					5)
-						schedule="0 0 1 * *"
-						;;
+						schedule="0 0 1 * *" ;;
 					6)
-						schedule="0 0 1 */2 *"
-						;;
+						schedule="0 0 1 */2 *" ;;
 					7)
-						schedule="0 * * * *"
-						;;
+						schedule="0 * * * *" ;;
 					8)
 						info_message "Exemple de définition de job :"
 						info_message ".---------------- minute (0 - 59)"
@@ -124,24 +112,20 @@ while true; do
 						info_message "|  |  |  |  .---- jour de la semaine (0 - 6) (Dimanche=0 ou 7) OU sun,mon,tue,wed,thu,fri,sat"
 						info_message "|  |  |  |  |"
 						info_message "*  *  *  *  *"
-						read -p "Votre fréquence : " schedule
-						;;
+						read -p "Votre fréquence : " schedule ;;
 					9)
 						show_message "Retour au menu"
-						continue
-						;;
+						continue ;;
 					*)
 						error_message "Fréquence invalide."
-						exit 1
-						;;
+						exit 1 ;;
 				esac
 			fi
 
             # Ajout de la tâche au cron
 			echo
             (crontab -l ; echo "$schedule $cmd") | crontab -
-            info_message "Tâche ajoutée : '$cmd' sera exécutée selon l'horaire : $schedule"
-            ;;
+            info_message "Tâche ajoutée : '$cmd' sera exécutée selon l'horaire : $schedule" ;;
         3)
             # Sauvegarder les tâches cron dans un fichier temporaire
 			crontab_temp="/tmp/crontab_temp.txt"
@@ -172,18 +156,14 @@ while true; do
 			rm -f "$crontab_temp"
 			echo
 			info_message "Tâche supprimée avec succès."
-			echo
-            ;;
+			echo ;;
         4)
             info_message "Sortie."
 			echo
-            break
-
-            ;;
+            exit 0 ;;
         *)
             error_message "Option invalide."
-			echo
-            ;;
+			echo ;;
     esac
 done
 

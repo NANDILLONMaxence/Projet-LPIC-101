@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
       apt-get update -y && apt-get upgrade -y
       apt-get update -y
 
-      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2 dos2unix
+      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2 dos2unix rsyslog
 
 
 
@@ -57,6 +57,7 @@ Vagrant.configure("2") do |config|
       # All users
       chmod 755 /etc/gts/gts_cron.sh
 
+      # Group IT
       groupadd IT
       chgrp -R IT /etc/new_agents
       chmod 2750 /etc/new_agents
@@ -64,6 +65,10 @@ Vagrant.configure("2") do |config|
       chgrp IT /etc/gts/gts_surveillance.sh
       chmod 750 /etc/gts/gts_surveillance.sh
 
+      chgrp IT /etc/gts/gts_
+      chmod 750 /etc/gts/gts_journalisation.sh
+
+      # Add permissions on file sudoer
       echo '# === Autorisations suplémentaires ===
       %IT ALL=(ALL:ALL) ALL
       agent_RH-1  ALL=(ALL) NOPASSWD: /usr/sbin/setquota' | tee -a /etc/sudoers
