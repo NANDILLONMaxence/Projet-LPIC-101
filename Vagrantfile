@@ -171,8 +171,8 @@ Vagrant.configure("2") do |config|
  
    Connexions SSH :
    - vagrant ssh debian12
-   - ssh agent-RH-1@192.168.60.200
-   - ssh adminesgi@192.168.60.200
+   - ssh agent-RH-1@192.168.60.150
+   - ssh adminesgi@192.168.60.150
    - vagrant ssh
    - ssh [user]@127.0.0.1 -p 2222
   MESSAGE

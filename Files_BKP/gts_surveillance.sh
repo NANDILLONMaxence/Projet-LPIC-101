@@ -72,7 +72,7 @@ while true; do
         2) launch_htop ;;
         3) list_processes ;;
 		4) check_memory_usage ;;			
-        5) info_message "Sortie." ; break ;;
+        5) info_message "Sortie." ; exit 0 ;;
         *) error_message "Option invalide. Veuillez réessayer." ;;
     esac
     echo

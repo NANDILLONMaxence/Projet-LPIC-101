@@ -138,14 +138,14 @@ while true; do
     read -p "Choisissez une option : " choix
 
     case $choix in
-    1) create_user ;;
-    2) delete_user ;;
-    3) create_group ;;
-    4) assign_user_to_group ;;
-    5) set_user_quota ;;
-    6) set_user_systemctl ;;
-    7) info_message "Sortie." ; exit 0 ;;
-    *) error_message "Option invalide. Veuillez réessayer." ;;
+        1) create_user ;;
+        2) delete_user ;;
+        3) create_group ;;
+        4) assign_user_to_group ;;
+        5) set_user_quota ;;
+        6) set_user_systemctl ;;
+        7) info_message "Sortie." ; exit 0 ;;
+        *) error_message "Option invalide. Veuillez réessayer." ;;
     esac
     echo
 done

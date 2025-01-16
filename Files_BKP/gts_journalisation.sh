@@ -136,7 +136,7 @@ while true; do
         4) enable_advanced_logging ;;
         5) restart_rsyslog ;;
         6) verify_logging ;;
-        7) echo "Sortie." ; echo ; exit 0 ;;
+        7) echo "Sortie." ; exit 0 ;;
         *) echo "Option invalide. Veuillez réessayer." ;;
     esac
 done
