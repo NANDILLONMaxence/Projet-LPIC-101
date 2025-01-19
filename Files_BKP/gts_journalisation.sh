@@ -119,7 +119,7 @@ verify_configuration() {
 
 # === Menu principal ===
 while true; do
-    show_message "\nMenu de configuration de la journalisation système :"
+    show_message " === Menu de configuration de la journalisation système ==="
     echo "1) Vérification et installation de rsyslog"
     echo "2) Configuration de la journalisation centralisée"
     echo "3) Mise en place de la rotation des journaux"

@@ -36,8 +36,7 @@ while true; do
             show_message "=== Liste des taches ==="
 			crontab -l
 			echo
-            continue
-            ;;
+            continue ;;
         2)
             # Sous-menu pour planifier une tâche
             show_message "=== Planification de tache ==="

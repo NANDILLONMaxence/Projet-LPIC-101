@@ -9,7 +9,7 @@ check_user_disk_space() {
     mkdir -p "$log_dir"
 
     # Calculer l'espace utilisé et consigner dans le fichier de log
-    du -sh "$user_dir" | awk '{print $1 " utilisé sur un maximum de 10 Go"}' >> "$log_dir/cron_space_disk.log" 2>&1
+    du -sh "$user_dir" | awk '{print $1 " utilisé sur un maximum de 1 Go"}' >> "$log_dir/cron_space_disk.log" 2>&1
 
     # Afficher un message de confirmation
     echo "L'utilisation de l'espace disque a été enregistrée dans $log_dir/cron_space_disk.log."

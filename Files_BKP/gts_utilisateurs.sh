@@ -127,7 +127,7 @@ set_user_systemctl() {
 
 # === Menu principal ===
 while true; do
-    show_message "\n=== Menu Gestion des Utilisateurs ==="
+    show_message "=== Menu Gestion des Utilisateurs ==="
     echo "1. Créer un utilisateur"
     echo "2. Supprimer un utilisateur"
     echo "3. Créer un groupe"

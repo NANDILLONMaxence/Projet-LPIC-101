@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
       chgrp IT /etc/gts/gts_surveillance.sh
       chmod 750 /etc/gts/gts_surveillance.sh
 
-      chgrp IT /etc/gts/gts_
+      chgrp IT /etc/gts/gts_journalisation.sh
       chmod 750 /etc/gts/gts_journalisation.sh
 
       # Add permissions on file sudoer
@@ -144,6 +144,14 @@ Vagrant.configure("2") do |config|
         echo "Quotas activés pour /mnt/data_disk."
       fi
 
+      # === Dossiers de sauvegarde par départements ===
+      mkdir -p  /mnt/data_disk/DEP/RH
+      chgrp RH /mnt/data_disk/DEP/RH
+      chmod 770 /mnt/data_disk/DEP/RH
+      mkdir -p /mnt/data_disk/DEP/IT
+      chgrp IT /mnt/data_disk/DEP/IT
+      chmod 770 /mnt/data_disk/DE/IT
+
       # === Configure GRUB ===
       sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=2/' /etc/default/grub
       sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="quiet splash"/' /etc/default/grub
@@ -156,7 +164,7 @@ Vagrant.configure("2") do |config|
       systemctl enable ssh
       #/lib/systemd/systemd-sysv-install enable ssh
 
-      # Recharger
+      # === Relance de la VM ===
       reboot
       SHELL
   end
