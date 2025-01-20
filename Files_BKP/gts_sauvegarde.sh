@@ -24,7 +24,7 @@ BASE_DIR="/mnt/data_disk/DEP"
 
 # === Vérification département et groupe ===
 verif_dep_groupe() {
-  read -p "Entrez le nom du département à initialiser : " DEPARTEMENT
+  read -p "Entrez le nom de votre département : " DEPARTEMENT
   DEP_DIR="$BASE_DIR/$DEPARTEMENT"
 
   # === Vérifier si le groupe existe ===
@@ -35,8 +35,8 @@ verif_dep_groupe() {
 
   # === Vérifier si le dossier existe ===
   if [ ! -d "$DEP_DIR" ]; then
-    mkdir -p "$DEP_DIR"
-    info_message "Dossier créé : $DEP_DIR"
+    
+    error_message "Dossier $DEP_DIR n'existe pas. Veuillez demander à votre administrateur de le créer."
   else
     show_message "Le dossier $DEP_DIR existe."
   fi
@@ -93,7 +93,7 @@ planifier_sauvegarde() {
 # === Menu principal ===
 while true; do
     show_message "=== Menu de configuration sauvegarde ==="
-    echo "1. Initialiser ou créer un département"
+    echo "1. Vérifier l'existance du département et du groupe"
     echo "2. Sauvegarde manuelle"
     echo "3. Planifier une sauvegarde automatique"
     echo "4. Quitter"

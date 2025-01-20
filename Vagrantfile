@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
 
     # === Add data disk (50GB) ===
     unless File.exist?("./data_disk.vdi")
-      vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 3 * 1024]
+      vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 10 * 1024]
     end
     vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", "./data_disk.vdi"]
   end
@@ -41,6 +41,9 @@ Vagrant.configure("2") do |config|
       # === Add files/folders ===
       touch /etc/new_agents/new_agents.txt
       cp -r /vagrant/Files_BKP /home/vagrant/Files_BKP
+
+      # === Convert syntaxe on UNIX ===
+      dos2unix /home/vagrant/Files_BKP/*.sh
 
       # === Move files and set permissions ===
       cp /home/vagrant/Files_BKP/cron_space_disk.sh /etc/cron_script
@@ -150,7 +153,7 @@ Vagrant.configure("2") do |config|
       chmod 770 /mnt/data_disk/DEP/RH
       mkdir -p /mnt/data_disk/DEP/IT
       chgrp IT /mnt/data_disk/DEP/IT
-      chmod 770 /mnt/data_disk/DE/IT
+      chmod 770 /mnt/data_disk/DEP/IT
 
       # === Configure GRUB ===
       sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=2/' /etc/default/grub

@@ -76,31 +76,31 @@ set_user_quota() {
         read -p "Entrez le nom d'utilisateur : " username
         if id "$username" &>/dev/null; then
             show_message "Utilisateur trouvé : $username"
-            
+
             while true; do
                 show_message "Quelle quantité d'espace disque souhaitez-vous attribuer ? (1Go ou 2Go)"
                 read -p "Entrez 1 ou 2 : " space_choice
-                
+
                 if [ "$space_choice" == "1" ]; then
-                    quota_size="1G"
+                    quota_size="1048576" # 1 Go en blocs de 1 Ko
                     info_message "Vous avez choisi 1 Go pour $username."
                     break
                 elif [ "$space_choice" == "2" ]; then
-                    quota_size="2G"
+                    quota_size="2097152" # 2 Go en blocs de 1 Ko
                     info_message "Vous avez choisi 2 Go pour $username."
                     break
                 else
                     error_message "Choix invalide. Veuillez entrer 1 ou 2."
                 fi
             done
-            
+
             # Appliquer le quota sur le répertoire de l'utilisateur
-            home_dir=$(eval echo "~$username") # Récupérer le chemin du répertoire utilisateur
+            home_dir="/mnt/data_disk"
             if [ -d "$home_dir" ]; then
                 info_message "Application du quota de $quota_size sur l'utilisateur : $username"
-                
+
                 # Configuration du quota (assurez-vous que le système prend en charge les quotas)
-                doas setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir" && info_message "Quota appliqué avec succès pour $username." || error_message "Échec de l'application du quota."
+                setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir" && info_message "Quota appliqué avec succès pour $username." || error_message "Échec de l'application du quota."
             else
                 error_message "Le répertoire de l'utilisateur n'existe pas ou n'est pas accessible : $home_dir"
             fi
