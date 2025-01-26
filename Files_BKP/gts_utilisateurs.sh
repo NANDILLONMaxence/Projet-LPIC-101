@@ -2,6 +2,7 @@
 
 # === Définir des couleurs pour les messages ===
 color_B="\033[1;34m"  # Bleu clair
+color_W="\033[1;37m]" # Blanc clair
 color_R="\033[1;31m"  # Rouge clair
 color_G="\033[1;32m"  # Vert clair
 reset_color="\033[0m" # Réinitialisation des couleurs
@@ -9,6 +10,10 @@ reset_color="\033[0m" # Réinitialisation des couleurs
 # === Fonctions pour afficher des messages colorés ===
 show_message() {
     echo -e "${color_B}$1${reset_color}"
+}
+
+show_option() {
+    echo -e "${color_W}$1${reset_color}"
 }
 
 error_message() {
@@ -128,13 +133,13 @@ set_user_systemctl() {
 # === Menu principal ===
 while true; do
     show_message "=== Menu Gestion des Utilisateurs ==="
-    echo "1. Créer un utilisateur"
-    echo "2. Supprimer un utilisateur"
-    echo "3. Créer un groupe"
-    echo "4. Affecter un utilisateur à un groupe"
-    echo "5. Définir un quota disque pour un utilisateur"
-    echo "6. Configurer la gestion du service Apache"
-    echo "7. Quitter"
+    show_option "1. Créer un utilisateur"
+    show_option "2. Supprimer un utilisateur"
+    show_option "3. Créer un groupe"
+    show_option "4. Affecter un utilisateur à un groupe"
+    show_option "5. Définir un quota disque pour un utilisateur"
+    show_option "6. Configurer la gestion du service Apache"
+    show_option "7. Quitter"
     read -p "Choisissez une option : " choix
 
     case $choix in
@@ -145,7 +150,7 @@ while true; do
         5) set_user_quota ;;
         6) set_user_systemctl ;;
         7) info_message "Sortie." ; exit 0 ;;
-        *) error_message "Option invalide. Veuillez réessayer." ;;
+        *) error_message "Option invalide, veuillez réessayer." ;;
     esac
     echo
 done

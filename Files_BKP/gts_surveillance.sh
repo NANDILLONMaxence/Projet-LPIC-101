@@ -2,6 +2,7 @@
 
 # === Définir des couleurs pour les messages ===
 color_B="\033[1;34m"  # Bleu clair
+color_W="\033[1;37m]" # Blanc clair
 color_R="\033[1;31m"  # Rouge clair
 color_G="\033[1;32m"  # Vert clair
 reset_color="\033[0m"  # Réinitialisation des couleurs
@@ -9,6 +10,10 @@ reset_color="\033[0m"  # Réinitialisation des couleurs
 # === Fonctions pour afficher des messages colorés ===
 show_message() {
     echo -e "${color_B}$1${reset_color}"
+}
+
+show_option() {
+    echo -e "${color_W}$1${reset_color}"
 }
 
 error_message() {
@@ -58,11 +63,11 @@ check_memory_usage() {
 # === Menu principal ===
 while true; do
     show_message "=== Menu de surveillance du serveur ==="
-    show_message "1. Surveiller l'espace disque"
-    show_message "2. Lister les processus actifs (en temps réel)"
-	show_message "3. TOP 10 des processus par utilisation CPU/MEM"
-    show_message "4. Surveiller l'utilisation de la mémoire"
-    show_message "5. Quitter"
+    show_option "1. Surveiller l'espace disque"
+    show_option "2. Lister les processus actifs (en temps réel)"
+	show_option "3. TOP 10 des processus par utilisation CPU/MEM"
+    show_option "4. Surveiller l'utilisation de la mémoire"
+    show_option "5. Quitter"
     echo
     read -p "Choisissez une option : " choix
     echo
@@ -73,7 +78,7 @@ while true; do
         3) list_processes ;;
 		4) check_memory_usage ;;			
         5) info_message "Sortie." ; exit 0 ;;
-        *) error_message "Option invalide. Veuillez réessayer." ;;
+        *) error_message "Option invalide, veuillez réessayer." ;;
     esac
     echo
 done

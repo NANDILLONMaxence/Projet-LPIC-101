@@ -2,6 +2,7 @@
 
 # === Définir des couleurs pour les messages ===
 color_B="\033[1;34m"  # Bleu clair
+color_W="\033[1;37m]" # Blanc clair
 color_R="\033[1;31m"  # Rouge clair
 color_G="\033[1;32m"  # Vert clair
 reset_color="\033[0m" # Réinitialisation des couleurs
@@ -9,6 +10,10 @@ reset_color="\033[0m" # Réinitialisation des couleurs
 # === Fonctions pour afficher des messages colorés ===
 show_message() {
     echo -e "${color_B}$1${reset_color}"
+}
+
+show_option() {
+    echo -e "${color_W}$1${reset_color}"
 }
 
 error_message() {
@@ -93,10 +98,10 @@ planifier_sauvegarde() {
 # === Menu principal ===
 while true; do
     show_message "=== Menu de configuration sauvegarde ==="
-    echo "1. Vérifier l'existance du département et du groupe"
-    echo "2. Sauvegarde manuelle"
-    echo "3. Planifier une sauvegarde automatique"
-    echo "4. Quitter"
+    show_option "1. Vérifier l'existance du département et du groupe"
+    show_option "2. Sauvegarde manuelle"
+    show_option "3. Planifier une sauvegarde automatique"
+    show_option "4. Quitter"
     read -p "Sélectionnez une option : " CHOIX
 
     case $CHOIX in
