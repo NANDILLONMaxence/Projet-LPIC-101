@@ -86,7 +86,7 @@ enable_advanced_logging() {
             show_message "Configuration de la journalisation avancée pour $service..."
             echo "if \$programname == \"$service\" then /var/log/$service.log" | sudo tee -a /etc/rsyslog.conf
             
-            # Crée le fichier de log s'il n'existe pas
+            # Vérifier si le fichier de log existe.
             if [ ! -f /var/log/$service.log ]; then
 				show_message Création des fichiers de logs.
                 sudo touch /var/log/$service.log
