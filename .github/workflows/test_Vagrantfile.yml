@@ -1,0 +1,49 @@
+name: Test Vagrantfile
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-vagrant:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Restore Vagrant & VirtualBox from cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/bin/vagrant
+            /usr/bin/virtualbox
+            ~/.vagrant.d
+          key: vagrant-virtualbox-cache
+
+      - name: Install VirtualBox and Vagrant (if missing)
+        run: |
+          set -euxo pipefail
+          if ! command -v vagrant &>/dev/null || ! command -v virtualbox &>/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y virtualbox vagrant
+          else
+            echo "Vagrant et VirtualBox déjà installés, utilisation du cache."
+          fi
+
+      - name: Validate Vagrantfile
+        run: vagrant validate
+
+      - name: Start Vagrant machine
+        run: vagrant up --provider=virtualbox
+
+      - name: Check VM is running
+        run: vagrant ssh debian12 -c "hostname"
+
+      - name: Destroy Vagrant machine
+        run: vagrant destroy -f

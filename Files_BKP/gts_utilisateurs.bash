@@ -104,8 +104,12 @@ set_user_quota() {
             if [ -d "$home_dir" ]; then
                 info_message "Application du quota de $quota_size sur l'utilisateur : $username"
 
-                # Configuration du quota (assurez-vous que le système prend en charge les quotas)
-                setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir" && info_message "Quota appliqué avec succès pour $username." || error_message "Échec de l'application du quota."
+                # Configuration du quota (assurez-vous que le système prend en charge les quotas (repquota -a))
+                if setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir"; then
+                    info_message "Quota appliqué avec succès pour $username."
+                else    
+                    error_message "Échec de l'application du quota."
+                fi
             else
                 error_message "Le répertoire de l'utilisateur n'existe pas ou n'est pas accessible : $home_dir"
             fi
