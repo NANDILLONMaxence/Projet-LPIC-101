@@ -1,0 +1,52 @@
+name: Check Bash syntax
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-bash-syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Cache ShellCheck
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/shellcheck
+        key: ${{ runner.os }}-shellcheck-${{ hashFiles('**/*.bash') }}
+        restore-keys: |
+          ${{ runner.os }}-shellcheck-
+
+    - name: Install ShellCheck
+      run: |
+        if ! command -v shellcheck &> /dev/null; then
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+        fi
+
+    - name: Check for UNIX line endings
+      run: |
+        # Vérifier les fins de ligne UNIX (LF) et signaler une erreur si ce n'est pas le cas
+        incorrect_endings=$(find . -type f -name "*.bash" -exec file {} \; | grep -v 'with LF line terminators')
+        
+        if [ -n "$incorrect_endings" ]; then
+          echo "Error: Some files have incorrect line endings (not UNIX)."
+          echo "$incorrect_endings"
+          exit 1
+        else
+          echo "All files have UNIX line endings (LF)."
+        fi
+
+    - name: Run ShellCheck on all Bash files
+      run: |
+        # Trouver tous les fichiers .bash dans le dépôt et exécuter shellcheck
+        find . -type f -name "*.bash" | while read -r file; do
+          echo "Checking $file..."
+          shellcheck "$file"
+        done
