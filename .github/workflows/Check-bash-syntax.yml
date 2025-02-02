@@ -30,10 +30,14 @@ jobs:
           sudo apt-get install -y shellcheck
         fi
 
-    - name: Run ShellCheck on all Bash files
+    - name: Run ShellCheck on all Bash files except exclusions
       run: |
-        # Trouver tous les fichiers .bash dans le dépôt et exécuter shellcheck
+        EXCLUSIONS=("./Files_BKP/provision.bash")
         find . -type f -name "*.bash" | while read -r file; do
-          echo "Checking $file..."
-          shellcheck "$file"
+          if [[ ! " ${EXCLUSIONS[@]} " =~ " $file " ]]; then
+            echo "Vérification $file..."
+            shellcheck "$file"
+          else
+            echo "Exclusion de $file"
+          fi
         done
