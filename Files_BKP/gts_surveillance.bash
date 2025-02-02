@@ -69,7 +69,7 @@ while true; do
     show_option "4. Surveiller l'utilisation de la mémoire"
     show_option "5. Quitter"
     echo
-    read -p "Choisissez une option : " choix
+    read -r -p "Choisissez une option : " choix
     echo
 
     case $choix in

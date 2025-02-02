@@ -29,7 +29,7 @@ BASE_DIR="/mnt/data_disk/DEP"
 
 # === Vérification département et groupe ===
 verif_dep_groupe() {
-  read -p "Entrez le nom de votre département : " DEPARTEMENT
+  read -r -p "Entrez le nom de votre département : " DEPARTEMENT
   DEP_DIR="$BASE_DIR/$DEPARTEMENT"
 
   # === Vérifier si le groupe existe ===
@@ -50,11 +50,11 @@ verif_dep_groupe() {
 # === Sauvegarde manuelle ===
 sauvegarde_manuelle() {
   show_message "Sauvegarde manuelle :"
-  read -p "Entrez le nom du département ou du groupe : " DEPARTEMENT
+  read -r -p "Entrez le nom du département ou du groupe : " DEPARTEMENT
   DEP_DIR="$BASE_DIR/$DEPARTEMENT"
 
   if [ -d "$DEP_DIR" ]; then
-    read -p "Entrez le chemin du fichier ou dossier à sauvegarder : " SOURCE
+    read -r -p "Entrez le chemin du fichier ou dossier à sauvegarder : " SOURCE
     if [ -e "$SOURCE" ]; then
       cp -r "$SOURCE" "$DEP_DIR"
       info_message "Sauvegarde réussie dans $DEP_DIR"
@@ -69,11 +69,11 @@ sauvegarde_manuelle() {
 # === Planification d'une tâche cron pour la sauvegarde automatique ===
 planifier_sauvegarde() {
   show_message "Planification d'une tâche cron :"
-  read -p "Entrez le nom du département : " DEPARTEMENT
+  read -r -p "Entrez le nom du département : " DEPARTEMENT
   DEP_DIR="$BASE_DIR/$DEPARTEMENT"
 
   if [ -d "$DEP_DIR" ]; then
-    read -p "Entrez le chemin du fichier ou dossier à sauvegarder automatiquement : " SOURCE
+    read -r -p "Entrez le chemin du fichier ou dossier à sauvegarder automatiquement : " SOURCE
     if [ -e "$SOURCE" ]; then
       info_message "Exemple de définition de job :"
       info_message ".---------------- minute (0 - 59)"
@@ -83,7 +83,7 @@ planifier_sauvegarde() {
       info_message "|  |  |  |  .---- jour de la semaine (0 - 6) (Dimanche=0 ou 7) OU sun,mon,tue,wed,thu,fri,sat"
       info_message "|  |  |  |  |"
       info_message "*  *  *  *  *"
-      read -p "Entrez la fréquence de la sauvegarde (ex : '0 2 * * *' pour tous les jours à 2h) : " FREQUENCE
+      read -r -p "Entrez la fréquence de la sauvegarde (ex : '0 2 * * *' pour tous les jours à 2h) : " FREQUENCE
       CRON_CMD="$FREQUENCE cp -r $SOURCE $DEP_DIR"
       (crontab -l; echo "$CRON_CMD") | crontab -
       info_message "Tâche cron ajoutée avec succès : $CRON_CMD"
@@ -102,7 +102,7 @@ while true; do
     show_option "2. Sauvegarde manuelle"
     show_option "3. Planifier une sauvegarde automatique"
     show_option "4. Quitter"
-    read -p "Sélectionnez une option : " CHOIX
+    read -r -p "Sélectionnez une option : " CHOIX
 
     case $CHOIX in
       1) verif_dep_groupe ;;
