@@ -7,7 +7,7 @@ verifrsyslog(){
   else
     echo "rsyslog n'est pas installé. Installation en cours..."
     sudo apt-get update && sudo apt-get install -y rsyslog
-    if [ $? -eq 0 ]; then
+    if mycmd; then
       echo "rsyslog installé avec succès."
     else
       echo "Erreur lors de l'installation de rsyslog."
@@ -17,6 +17,7 @@ verifrsyslog(){
 }
 
 configJournal() {
+  sudo touch /var/log/syslog-central.log
   LOG_FILE="/var/log/syslog-central.log"
   # Vérifier si le fichier existe déjà
   if [ ! -f "$LOG_FILE" ]; then
@@ -25,7 +26,7 @@ configJournal() {
   # Ajouter ou modifier ligne de config dans /etc/rsyslog.conf
   if ! grep -q "*.* $LOG_FILE" /etc/rsyslog.conf; then
     echo "*.* $LOG_FILE" | sudo tee -a /etc/rsyslog.conf
-    if [ $? -eq 0 ]; then
+    if mycmd; then
       echo "Journalisation centralisée configurée."
     else
       echo "Erreur lors de la configuration de la journalisation centralisée."
@@ -34,6 +35,7 @@ configJournal() {
   else
     echo "Journalisation déjà configurée."
   fi
+  restart_rsyslog
 }
 
 # Mise en place de la rotation des journaux
@@ -49,7 +51,7 @@ $LOG_FILE {
     notifempty
 }
 EOL
-if [ $? -eq 0 ]; then
+if mycmd; then
     echo "Rotation des journaux configurée."
   else
     echo "Erreur lors de la configuration de la rotation des journaux."
@@ -59,9 +61,8 @@ if [ $? -eq 0 ]; then
 
 
 restart_rsyslog() {
-    echo "redemarage du rsylog en cours..."
     sudo systemctl restart rsyslog
-    if [ $? -eq 0 ]; then
+    if mycmd; then
         echo "restart success."
     else 
         echo "restart failed"
@@ -79,7 +80,7 @@ EOL
     sudo tee /etc/rsyslog.d/mysql.conf > /dev/null <<EOL
     if ($program == "mysqld") then /var/log/mysql/error.log
 EOL
-  if [ $? -eq 0 ]; then
+  if mycmd; then
     echo "Journalisation avancée configurée."
   else
     echo "Erreur lors de la configuration de la journalisation avancée."
@@ -143,3 +144,4 @@ while true; do
             echo "Option invalide, veuillez réessayer.";;
     esac
 done
+
