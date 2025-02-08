@@ -32,7 +32,7 @@ while true; do
     show_option "3. Supprimer une tâche cron"
     show_option "4. Quitter"
 	echo
-    read -p "Choisissez une option : " choix
+    read -r -p "Choisissez une option : " choix
 	echo
 
     case $choix in
@@ -51,7 +51,7 @@ while true; do
 			show_option "3. Personnaliser la Planification de tache"
 			show_option "4. Retour au menu principal."
 			echo
-            read -p "Choisissez une commande à planifier : " commande
+            read -r -p "Choisissez une commande à planifier : " commande
 			echo
 
 			case $commande in
@@ -60,11 +60,11 @@ while true; do
 					schedule="0 9 * * *" # Exécution automatique à 9h tous les jours
 					echo ;;
 				2)
-					read -p "Entrez le chemin de votre fichier : " chemin
+					read -r -p "Entrez le chemin de votre fichier : " chemin
 					cmd="rm $chemin" ;;
 				3)
-					read -p "Entrez votre commande personnalisée : " cmd
-					read -p "Votre fréquence (ex. * * * * *): " schedule ;;
+					read -r -p "Entrez votre commande personnalisée : " cmd
+					read -r -p "Votre fréquence (ex. * * * * *): " schedule ;;
 				4)
 					show_message "Retour au menu principal." ; continue ;;
 	
@@ -87,7 +87,7 @@ while true; do
 				show_option "8. Personnaliser la fréquence"
 				show_option "9. Retour au menu principal."
 				echo
-				read -p "Choisissez une fréquence : " frequence
+				read -r -p "Choisissez une fréquence : " frequence
 				echo
 
 				case $frequence in
@@ -114,7 +114,7 @@ while true; do
 						info_message "|  |  |  |  .---- jour de la semaine (0 - 6) (Dimanche=0 ou 7) OU sun,mon,tue,wed,thu,fri,sat"
 						info_message "|  |  |  |  |"
 						info_message "*  *  *  *  *"
-						read -p "Votre fréquence : " schedule ;;
+						read -r -p "Votre fréquence : " schedule ;;
 					9)
 						show_message "Retour au menu principal." ; continue ;;
 					*)
@@ -138,7 +138,7 @@ while true; do
 			cat -n "$crontab_temp"
 			
 			# Demander à l'utilisateur le numéro de la tâche à supprimer
-			read -p "Entrez le numéro de la tâche à supprimer : " ligne
+			read -r -p "Entrez le numéro de la tâche à supprimer : " ligne
 
 			# Supprimer la tâche spécifiée
 			if ! sed -i "${ligne}d" "$crontab_temp"; then

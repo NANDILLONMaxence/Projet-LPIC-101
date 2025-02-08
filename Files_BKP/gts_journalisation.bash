@@ -6,8 +6,7 @@ verifrsyslog(){
     echo "rsyslog est déjà installé."
   else
     echo "rsyslog n'est pas installé. Installation en cours..."
-    sudo apt-get update && sudo apt-get install -y rsyslog
-    if [ $? -eq 0 ]; then
+    if sudo apt-get update && sudo apt-get install -y rsyslog ; then
       echo "rsyslog installé avec succès."
     else
       echo "Erreur lors de l'installation de rsyslog."
@@ -17,6 +16,7 @@ verifrsyslog(){
 }
 
 configJournal() {
+  sudo touch /var/log/syslog-central.log
   LOG_FILE="/var/log/syslog-central.log"
   # Vérifier si le fichier existe déjà
   if [ ! -f "$LOG_FILE" ]; then
@@ -24,8 +24,7 @@ configJournal() {
   fi
   # Ajouter ou modifier ligne de config dans /etc/rsyslog.conf
   if ! grep -q "*.* $LOG_FILE" /etc/rsyslog.conf; then
-    echo "*.* $LOG_FILE" | sudo tee -a /etc/rsyslog.conf
-    if [ $? -eq 0 ]; then
+    if echo "*.* $LOG_FILE" | sudo tee -a /etc/rsyslog.conf; then
       echo "Journalisation centralisée configurée."
     else
       echo "Erreur lors de la configuration de la journalisation centralisée."
@@ -34,13 +33,14 @@ configJournal() {
   else
     echo "Journalisation déjà configurée."
   fi
+  restart_rsyslog
 }
 
 # Mise en place de la rotation des journaux
 configRotation(){
-echo "Config de la rotation des journaux pour $LOG_FILE"
-ROTATE_CONFIG="/etc/logrotate.d/syslog-central"
-sudo tee $ROTATE_CONFIG > /dev/null <<EOL
+    echo "Config de la rotation des journaux pour $LOG_FILE"
+    ROTATE_CONFIG="/etc/logrotate.d/syslog-central"
+    if sudo tee "$ROTATE_CONFIG" > /dev/null <<EOL
 $LOG_FILE {
     size 10M
     rotate 5
@@ -49,19 +49,16 @@ $LOG_FILE {
     notifempty
 }
 EOL
-if [ $? -eq 0 ]; then
-    echo "Rotation des journaux configurée."
-  else
-    echo "Erreur lors de la configuration de la rotation des journaux."
-    exit 1
-  fi
+    then
+        echo "Rotation des journaux configurée."
+    else
+        echo "Erreur lors de la configuration de la rotation des journaux."
+        exit 1
+    fi
 }
 
-
 restart_rsyslog() {
-    echo "redemarage du rsylog en cours..."
-    sudo systemctl restart rsyslog
-    if [ $? -eq 0 ]; then
+    if sudo systemctl restart rsyslog; then
         echo "restart success."
     else 
         echo "restart failed"
@@ -70,22 +67,23 @@ restart_rsyslog() {
 }
 
 configure_advanced_logging() {
-  sudo tee /etc/rsyslog.d/apache.conf > /dev/null <<EOL
-    if ($program == "apache2") then /var/log/apache2/error.log
+    if sudo tee /etc/rsyslog.d/apache.conf > /dev/null <<EOL
+if \$programname == 'apache2' then /var/log/apache2/error.log
+EOL && sudo tee /etc/rsyslog.d/ssh.conf > /dev/null <<EOL
+if \$programname == 'sshd' then /var/log/auth.log
+EOL && sudo tee /etc/rsyslog.d/mysql.conf > /dev/null <<EOL
+if \$programname == 'mysqld' then /var/log/mysql/error.log
 EOL
-    sudo tee /etc/rsyslog.d/ssh.conf > /dev/null <<EOL
-    if ($program == "sshd") then /var/log/auth.log
-EOL
-    sudo tee /etc/rsyslog.d/mysql.conf > /dev/null <<EOL
-    if ($program == "mysqld") then /var/log/mysql/error.log
-EOL
-  if [ $? -eq 0 ]; then
-    echo "Journalisation avancée configurée."
-  else
-    echo "Erreur lors de la configuration de la journalisation avancée."
-    exit 1
-  fi
+    then
+        echo "Journalisation avancée configurée."
+    else
+        echo "Erreur lors de la configuration de la journalisation avancée."
+        exit 1
+    fi
 }
+
+
+
 
 verify_log_configuration() {
   echo "Vérification de la configuration des journaux..."
@@ -143,3 +141,4 @@ while true; do
             echo "Option invalide, veuillez réessayer.";;
     esac
 done
+

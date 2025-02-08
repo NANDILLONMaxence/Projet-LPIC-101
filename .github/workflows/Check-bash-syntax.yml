@@ -1,0 +1,43 @@
+name: Check Bash syntax
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-bash-syntax:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Cache ShellCheck
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/shellcheck
+        key: ${{ runner.os }}-shellcheck-${{ hashFiles('**/*.bash') }}
+        restore-keys: |
+          ${{ runner.os }}-shellcheck-
+
+    - name: Install ShellCheck
+      run: |
+        if ! command -v shellcheck &> /dev/null; then
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+        fi
+
+    - name: Run ShellCheck on all Bash files except exclusions
+      run: |
+        EXCLUSIONS=("./Files_BKP/provision.bash")
+        find . -type f -name "*.bash" | while read -r file; do
+          if [[ ! " ${EXCLUSIONS[@]} " =~ " $file " ]]; then
+            echo "Vérification $file..."
+            shellcheck "$file"
+          else
+            echo "Exclusion de $file"
+          fi
+        done

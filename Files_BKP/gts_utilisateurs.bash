@@ -26,7 +26,7 @@ info_message() {
 
 # === Fonction pour créer un utilisateur ===
 create_user() {
-    read -p "Entrez le nom d'utilisateur : " username
+    read -r -p "Entrez le nom d'utilisateur : " username
     if id "$username" &>/dev/null; then
         error_message "L'utilisateur $username existe déjà."
     else
@@ -40,7 +40,7 @@ create_user() {
 
 # === Fonction pour supprimer un utilisateur ===
 delete_user() {
-    read -p "Entrez le nom d'utilisateur à supprimer : " username
+    read -r -p "Entrez le nom d'utilisateur à supprimer : " username
     if id "$username" &>/dev/null; then
         if doas userdel -r "$username" &>/dev/null; then
             info_message "Utilisateur $username supprimé avec succès."
@@ -54,7 +54,7 @@ delete_user() {
 
 # === Fonction pour créer un groupe ===
 create_group() {
-    read -p "Entrez le nom du groupe : " groupname
+    read -r -p "Entrez le nom du groupe : " groupname
     if getent group "$groupname" &>/dev/null; then
         error_message "Le groupe $groupname existe déjà."
     else
@@ -65,8 +65,8 @@ create_group() {
 
 # === Fonction pour ajouter un utilisateur à un groupe ===
 assign_user_to_group() {
-    read -p "Entrez le nom d'utilisateur : " username
-    read -p "Entrez le nom du groupe : " groupname
+    read -r -p "Entrez le nom d'utilisateur : " username
+    read -r -p "Entrez le nom du groupe : " groupname
     if id "$username" &>/dev/null && getent group "$groupname" &>/dev/null; then
         doas usermod -aG "$groupname" "$username"
         info_message "Utilisateur $username ajouté au groupe $groupname."
@@ -78,13 +78,13 @@ assign_user_to_group() {
 # === Fonction pour configurer un quota disque ===
 set_user_quota() {
     while true; do
-        read -p "Entrez le nom d'utilisateur : " username
+        read -r -p "Entrez le nom d'utilisateur : " username
         if id "$username" &>/dev/null; then
             show_message "Utilisateur trouvé : $username"
 
             while true; do
                 show_message "Quelle quantité d'espace disque souhaitez-vous attribuer ? (1Go ou 2Go)"
-                read -p "Entrez 1 ou 2 : " space_choice
+                read -r -p "Entrez 1 ou 2 : " space_choice
 
                 if [ "$space_choice" == "1" ]; then
                     quota_size="1048576" # 1 Go en blocs de 1 Ko
@@ -104,8 +104,12 @@ set_user_quota() {
             if [ -d "$home_dir" ]; then
                 info_message "Application du quota de $quota_size sur l'utilisateur : $username"
 
-                # Configuration du quota (assurez-vous que le système prend en charge les quotas)
-                setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir" && info_message "Quota appliqué avec succès pour $username." || error_message "Échec de l'application du quota."
+                # Configuration du quota (assurez-vous que le système prend en charge les quotas (repquota -a))
+                if setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir"; then
+                    info_message "Quota appliqué avec succès pour $username."
+                else    
+                    error_message "Échec de l'application du quota."
+                fi
             else
                 error_message "Le répertoire de l'utilisateur n'existe pas ou n'est pas accessible : $home_dir"
             fi
@@ -118,7 +122,7 @@ set_user_quota() {
 
 # === Fonction pour configurer l'autorisation d'utiliser systmctl ===
 set_user_systemctl() {
-    read -p "Entrez le nom d'utilisateur : " username
+    read -r -p "Entrez le nom d'utilisateur : " username
     if id "$username" &>/dev/null; then
         echo " # === Autorise $username à gerer le service apache ===
         permit nopass $username cmd systemctl args restart apache2
@@ -140,7 +144,7 @@ while true; do
     show_option "5. Définir un quota disque pour un utilisateur"
     show_option "6. Configurer la gestion du service Apache"
     show_option "7. Quitter"
-    read -p "Choisissez une option : " choix
+    read -r -p "Choisissez une option : " choix
 
     case $choix in
         1) create_user ;;
