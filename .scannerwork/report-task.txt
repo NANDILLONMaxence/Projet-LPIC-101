@@ -1,6 +1,0 @@
-projectKey=NANDILLONMaxence_Projet-LPIC-101_8fb7f23f-507e-40d9-920f-c2812b034d8d
-serverUrl=http://192.168.123.12:9000
-serverVersion=10.6.0.92116
-dashboardUrl=http://192.168.123.12:9000/dashboard?id=NANDILLONMaxence_Projet-LPIC-101_8fb7f23f-507e-40d9-920f-c2812b034d8d
-ceTaskId=2c85a95c-58b9-4f46-9e9b-ed9f2381a959
-ceTaskUrl=http://192.168.123.12:9000/api/ce/task?id=2c85a95c-58b9-4f46-9e9b-ed9f2381a959
