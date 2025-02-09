@@ -27,11 +27,28 @@ Vagrant.configure("2") do |config|
     debian12.vm.provision "shell", inline: <<-SHELL
       # === Update/Upgrade and install services ===
       apt-get update -y && apt-get upgrade -y
+
+      # === Install packages ===
+      ## === Install MySQL 8.0 ===
+      wget https://dev.mysql.com/get/mysql-apt-config_0.8.32-1_all.deb
+      debconf-set-selections <<< "mysql-apt-config mysql-apt-config/select-server select mysql-8.0"
+      debconf-set-selections <<< "mysql-apt-config mysql-apt-config/select-product select Ok"
+      debconf-set-selections <<< "mysql-apt-config mysql-apt-config/tools-component select Enabled"
+      DEBIAN_FRONTEND=noninteractive dpkg -i mysql-apt-config_0.8.32-1_all.deb
+      apt-get install -f -y
       apt-get update -y
+      ROOT_PASSWORD="root"
+      debconf-set-selections <<< "mysql-server mysql-server/root_password password $ROOT_PASSWORD"
+      debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $ROOT_PASSWORD"
+      DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
+      
+      ## === Tools ===
+      PACKAGES="linux-image-amd64 linux-headers-amd64 dkms build-essential \
+      doas quota htop openssh-server parted curl sudo vim tree e2fsprogs \
+      sshfs apache2 dos2unix rsyslog"
 
-      apt-get install -y linux-image-amd64 linux-headers-amd64 dkms build-essential doas quota htop openssh-server parted curl sudo vim tree e2fsprogs sshfs apache2 dos2unix rsyslog
-
-
+      apt-get install -y $PACKAGES
+      apt-get update -y
 
       # === Add folders ===
       mkdir -p /etc/gts
@@ -43,10 +60,10 @@ Vagrant.configure("2") do |config|
       cp -r /vagrant/Files_BKP /home/vagrant/Files_BKP
 
       # === Convert syntaxe on UNIX ===
-      dos2unix /home/vagrant/Files_BKP/*.sh
+      dos2unix /home/vagrant/Files_BKP/*.bash
 
       # === Move files and set permissions ===
-      cp /home/vagrant/Files_BKP/cron_space_disk.sh /etc/cron_script
+      cp /home/vagrant/Files_BKP/cron_space_disk.bash /etc/cron_script
       chmod 755 /etc/cron_script/*
       cp /home/vagrant/Files_BKP/gts* /etc/gts
 
@@ -54,28 +71,30 @@ Vagrant.configure("2") do |config|
       chmod 755 /etc/gts
 
       groupadd RH
-      chgrp RH /etc/gts/gts_utilisateurs.sh
-      chmod 750 /etc/gts/gts_utilisateurs.sh
+      chgrp RH /etc/gts/gts_utilisateurs.bash
+      chmod 750 /etc/gts/gts_utilisateurs.bash
 
       # All users
-      chmod 755 /etc/gts/gts_cron.sh
+      chmod 755 /etc/gts/gts_cron.bash
 
       # Group IT
       groupadd IT
       chgrp -R IT /etc/new_agents
       chmod 2750 /etc/new_agents
 
-      chgrp IT /etc/gts/gts_surveillance.sh
-      chmod 750 /etc/gts/gts_surveillance.sh
+      chgrp IT /etc/gts/gts_surveillance.bash
+      chmod 750 /etc/gts/gts_surveillance.bash
 
-      chgrp IT /etc/gts/gts_journalisation.sh
-      chmod 750 /etc/gts/gts_journalisation.sh
+      chgrp IT /etc/gts/gts_journalisation.bash
+      chmod 750 /etc/gts/gts_journalisation.bash
 
       # Add permissions on file sudoer
       echo '# === Autorisations suplémentaires ===
-      %IT ALL=(ALL:ALL) ALL
-      agent_RH-1  ALL=(ALL) NOPASSWD: /usr/sbin/setquota' | tee -a /etc/sudoers
+      %IT  ALL=(ALL:ALL) ALL
+      %RH  ALL=(ALL) NOPASSWD: /usr/sbin/setquota' | tee -a /etc/sudoers
 
+
+      # add perm sudo permission journa
       # === Add users ===
       adduser --gecos "" --disabled-password adminesgi
       echo "adminesgi:@zerty2QWERTY" | chpasswd
@@ -83,7 +102,7 @@ Vagrant.configure("2") do |config|
 
       adduser --gecos "" --disabled-password --allow-bad-names agent_RH-1
       echo "agent_RH-1:plume_souple-1" | chpasswd
-      usermod -aG RH agent_RH-1
+      usermod -aG RH agent_RH-1 
 
       # === Configuration des droits suplémentaires pour l'agent RH 1
       # Créer le fichier doas.conf s'il n'existe pas
@@ -92,35 +111,38 @@ Vagrant.configure("2") do |config|
       fi
       chmod 640 /etc/doas.conf
       
-      echo '# === Autoriser agent_RH-1 à gérer les utilisateurs et les groupes ===
-      permit nopass agent_RH-1 cmd adduser
-      permit nopass agent_RH-1 cmd userdel
-      permit nopass agent_RH-1 cmd groupadd
-      permit nopass agent_RH-1 cmd groupdel
-      permit nopass agent_RH-1 cmd groupmod
-      permit nopass agent_RH-1 cmd usermod
-      permit nopass agent_RH-1 cmd chpasswd
+      echo '# === Autoriser Groupe RH à gérer les utilisateurs et les groupes ===
+      permit nopass :RH cmd adduser
+      permit nopass :RH cmd userdel
+      permit nopass :RH cmd groupadd
+      permit nopass :RH cmd groupdel
+      permit nopass :RH cmd groupmod
+      permit nopass :RH cmd usermod
+      permit nopass :RH cmd chpasswd
 
-      # === Autoriser agent_RH-1 à gérer les groupes ===
-      permit nopass agent_RH-1 cmd gpasswd args -a
-      permit nopass agent_RH-1 cmd gpasswd args -d
-      permit nopass agent_RH-1 cmd gpasswd args -m
+      # === Autoriser Groupe RH à gérer les groupes ===
+      permit nopass :RH cmd gpasswd args -a
+      permit nopass :RH cmd gpasswd args -d
+      permit nopass :RH cmd gpasswd args -m
 
-      # === Autoriser agent_RH-1 à insérer du texte ===
-      permit nopass agent_RH-1 cmd tee args -a /etc/doas.conf
-      permit nopass agent_RH-1 cmd tee args -a /etc/new_agents/new_agents.txt
+      # === Autoriser Groupe RH à insérer du texte ===
+      permit nopass :RH cmd tee args -a /etc/doas.conf
+      permit nopass :RH cmd tee args -a /etc/new_agents/new_agents.txt
 
-      # === Autoriser agent_RH-1 à configurer des quotas ===
+      # === Autoriser Groupe RH à configurer des quotas ===
       # Voir dans visudo
-      #permit nopass agent_RH-1 cmd setquota
+      #permit nopass :RH cmd setquota
 
-      # === Restrictions pour agent_RH-1 ===
-      deny agent_RH-1 cmd gpasswd args -d sudo
-      deny agent_RH-1 cmd gpasswd args -d IT
-      deny agent_RH-1 cmd groupdel args sudo
-      deny agent_RH-1 cmd groupdel args IT
-      deny agent_RH-1 cmd chmod args 440 /etc/sudoers.d/root
-      deny agent_RH-1 cmd chmod args 440 /etc/sudoers.d/vagrant
+      # === Restrictions pour Groupe RH ===
+      deny :RH cmd gpasswd args -d sudo
+      deny :RH cmd gpasswd args -d IT
+      deny :RH cmd groupdel args sudo
+      deny :RH cmd groupdel args IT
+      deny :RH cmd chmod args 440 /etc/sudoers.d/root
+      deny :RH cmd chmod args 440 /etc/sudoers.d/vagrant
+
+      # === Autoriser Groupe IT à afficher les quotas === 
+      permit nopass :IT cmd repquota
 
       # === Autoriser root à exécuter des commandes sans mot de passe ===
       permit nopass root' > /etc/doas.conf

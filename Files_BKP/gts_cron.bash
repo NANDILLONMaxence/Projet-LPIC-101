@@ -2,10 +2,10 @@
 
 # === Définir des couleurs pour les messages ===
 color_B="\033[1;34m"  # Bleu clair
-color_W="\033[1;37m]" # Blanc clair
+color_W="\033[1;37m"  # Blanc clair
 color_R="\033[1;31m"  # Rouge clair
 color_G="\033[1;32m"  # Vert clair
-reset_color="\033[0m"  # Réinitialisation des couleurs
+reset_color="\033[0m" # Réinitialisation des couleurs
 
 # === Fonctions pour afficher des messages colorés ===
 show_message() {

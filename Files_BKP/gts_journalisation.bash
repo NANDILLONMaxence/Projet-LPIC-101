@@ -1,5 +1,33 @@
 #! /bin/bash
 
+
+# === Définir des couleurs pour les messages ===
+color_B="\033[1;34m"  # Bleu clair
+color_W="\033[1;37m]" # Blanc clair
+color_R="\033[1;31m"  # Rouge clair
+color_G="\033[1;32m"  # Vert clair
+reset_color="\033[0m" # Réinitialisation des couleurs
+
+# === Fonctions pour afficher des messages colorés ===
+show_message() {
+    echo -e "${color_B}$1${reset_color}"
+}
+
+show_option() {
+    echo -e "${color_W}$1${reset_color}"
+}
+
+error_message() {
+    echo -e "${color_R}$1${reset_color}"
+}
+
+info_message() {
+    echo -e "${color_G}$1${reset_color}"
+}
+
+
+
+
 #check si rsylog installe
 verifrsyslog(){
   if dpkg -s rsyslog &> /dev/null; then
@@ -9,39 +37,42 @@ verifrsyslog(){
     if sudo apt-get update && sudo apt-get install -y rsyslog ; then
       echo "rsyslog installé avec succès."
     else
-      echo "Erreur lors de l'installation de rsyslog."
+      error_message "Erreur lors de l'installation de rsyslog."
       exit 1
     fi
   fi
 }
 
 configJournal() {
-  sudo touch /var/log/syslog-central.log
-  LOG_FILE="/var/log/syslog-central.log"
-  # Vérifier si le fichier existe déjà
-  if [ ! -f "$LOG_FILE" ]; then
-    echo "Le fichier $LOG_FILE n'existe pas, il va être créé."
+  PATH_LOG_FILE="/var/log/syslog-central.log"
+  # Vérifier si le fichier de log existe, sinon le créer et donner les bonnes permissions
+  if [ ! -f "$PATH_LOG_FILE" ]; then
+    echo "Création du fichier de log : $PATH_LOG_FILE"
+    sudo touch "$PATH_LOG_FILE"
+    sudo chown syslog:adm "$PATH_LOG_FILE"  # Assure que syslog peut écrire
+    sudo chmod 640 "$PATH_LOG_FILE"
+    echo "fichier crée" 
   fi
-  # Ajouter ou modifier ligne de config dans /etc/rsyslog.conf
-  if ! grep -q "*.* $LOG_FILE" /etc/rsyslog.conf; then
-    if echo "*.* $LOG_FILE" | sudo tee -a /etc/rsyslog.conf; then
-      echo "Journalisation centralisée configurée."
-    else
-      echo "Erreur lors de la configuration de la journalisation centralisée."
-      exit 1
-    fi
+
+  # Vérifier si la ligne existe dans /etc/rsyslog.conf, sinon l'ajouter
+  if ! grep -q "^\*\.\* ${PATH_LOG_FILE}$" /etc/rsyslog.conf; then
+    echo "Ajout de la configuration dans /etc/rsyslog.conf..."
+    echo "*.*    $PATH_LOG_FILE" | sudo tee -a /etc/rsyslog.conf > /dev/null
+
+    # Redémarrer rsyslog après modification
+    restart_rsyslog
+    echo "Journalisation centralisée configurée et rsyslog redémarré."
   else
     echo "Journalisation déjà configurée."
   fi
-  restart_rsyslog
 }
 
 # Mise en place de la rotation des journaux
 configRotation(){
-    echo "Config de la rotation des journaux pour $LOG_FILE"
-    ROTATE_CONFIG="/etc/logrotate.d/syslog-central"
-    if sudo tee "$ROTATE_CONFIG" > /dev/null <<EOL
-$LOG_FILE {
+    echo "Config de la rotation des journaux pour $PATH_LOG_FILE"
+    PATH_ROTATE_CONFIG="/etc/logrotate.d/syslog-central"
+    if sudo tee "$PATH_ROTATE_CONFIG" > /dev/null <<EOL
+$PATH_LOG_FILE {
     size 10M
     rotate 5
     compress
@@ -52,7 +83,7 @@ EOL
     then
         echo "Rotation des journaux configurée."
     else
-        echo "Erreur lors de la configuration de la rotation des journaux."
+        error_message "Erreur lors de la configuration de la rotation des journaux."
         exit 1
     fi
 }
@@ -61,7 +92,7 @@ restart_rsyslog() {
     if sudo systemctl restart rsyslog; then
         echo "restart success."
     else 
-        echo "restart failed"
+        error_message "restart failed"
         exit 1
     fi     
 }
@@ -77,12 +108,10 @@ EOL
     then
         echo "Journalisation avancée configurée."
     else
-        echo "Erreur lors de la configuration de la journalisation avancée."
+        error_message "Erreur lors de la configuration de la journalisation avancée."
         exit 1
     fi
 }
-
-
 
 
 verify_log_configuration() {
@@ -111,14 +140,14 @@ fi
 }
 
 while true; do
-    echo "\n--- Menu Interactif ---"
-    echo "1. Vérification et installation de rsyslog"
-    echo "2. Configuration de la journalisation centralisée"
-    echo "3. Mise en place de la rotation des journaux"
-    echo "4. Activation de la journalisation avancée pour les services critiques"
-    echo "5. Redémarrage du service rsyslog"
-    echo "6. Vérification de la configuration des journaux"
-    echo "7. Quitter"
+    echo "--- Menu Interactif ---"
+    show_option "1. Vérification et installation de rsyslog"
+    show_option "2. Configuration de la journalisation centralisée"
+    show_option "3. Mise en place de la rotation des journaux"
+    show_option "4. Activation de la journalisation avancée pour les services critiques"
+    show_option "5. Redémarrage du service rsyslog"
+    show_option "6. Vérification de la configuration des journaux"
+    show_option "7. Quitter"
     read -p "Choisissez une option (1-7) : " CHOICE
 
     case $CHOICE in
@@ -138,7 +167,7 @@ while true; do
             echo "bye!"
             exit 0;;
         *)
-            echo "Option invalide, veuillez réessayer.";;
+            error_message "Option invalide, veuillez réessayer.";;
     esac
 done
 
