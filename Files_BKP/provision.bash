@@ -20,6 +20,9 @@ chmod 755 /etc/cron_script/*
 cp /home/vagrant/Files_BKP/gts* /etc/gts
 chmod 755 /etc/gts
 
+# Menu GTS principal
+chomd 755 /etc/gts/gts_main.bash
+
 # === Add group and set permissions ===
 groupadd RH
 chgrp RH /etc/gts/gts_utilisateurs.sh

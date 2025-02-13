@@ -70,6 +70,10 @@ Vagrant.configure("2") do |config|
       # === Add group and set permissions ===
       chmod 755 /etc/gts
 
+      # Menu GTS principal
+      chomd 755 /etc/gts/gts_main.bash
+
+      # Group RH
       groupadd RH
       chgrp RH /etc/gts/gts_utilisateurs.bash
       chmod 750 /etc/gts/gts_utilisateurs.bash
