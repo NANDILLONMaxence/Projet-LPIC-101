@@ -203,7 +203,7 @@ Vagrant.configure("2") do |config|
 
     Utilisateurs :
     - adminesgi - Mot de passe : @zerty2QWERTY
-    - agent_RH_1 - Mot de passe : plume_souple-1
+    - agent_RH-1 - Mot de passe : plume_souple-1
     - vagrant - Mot de passe : vagrant
  
    Connexions SSH :

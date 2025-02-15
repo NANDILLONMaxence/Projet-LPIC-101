@@ -25,10 +25,11 @@ info_message() {
 }
 
 # Chemins des scripts
-SCRIPT_JOURNALISATION="./gts_journalisation.bash"
-SCRIPT_SAUVEGARDE="./gts_sauvegarde.bash"
-SCRIPT_SURVEILLANCE="./gts_surveillance.bash"
 SCRIPT_UTILISATEURS="./gts_utilisateurs.bash"
+SCRIPT_SURVEILLANCE="./gts_surveillance.bash"
+SCRIPT_CRON="./gts_cron.bash"
+SCRIPT_SAUVEGARDE="./gts_sauvegarde.bash"
+SCRIPT_JOURNALISATION="./gts_journalisation.bash"
 
 # Journalisation des erreurs
 LOG_FILE="/var/log/gts_menu.log"
@@ -50,35 +51,24 @@ check_permission() {
 while true; do
     clear
     show_message "=== Menu Principal GTS ==="
-    show_option "1. Gestion de la journalisation"
-    show_option "2. Gestion des sauvegardes"
-    show_option "3. Surveillance du système"
-    show_option "4. Gestion des utilisateurs"
+    show_option "1. Gestion des utilisateurs"
+    show_option "2. Surveillance du système"
+    show_option "3. Gestion des taches avec cron"  
+    show_option "4. Gestion des sauvegardes" 
+    show_option "5. Gestion de la journalisation"
     show_option "5. Quitter"
     echo
     read -r -p "Sélectionnez une option : " CHOIX
 
     case $CHOIX in
-        1)
-            check_permission "$SCRIPT_JOURNALISATION" && bash "$SCRIPT_JOURNALISATION"
-            ;;
-        2)
-            check_permission "$SCRIPT_SAUVEGARDE" && bash "$SCRIPT_SAUVEGARDE"
-            ;;
-        3)
-            check_permission "$SCRIPT_SURVEILLANCE" && bash "$SCRIPT_SURVEILLANCE"
-            ;;
-        4)
-            check_permission "$SCRIPT_UTILISATEURS" && bash "$SCRIPT_UTILISATEURS"
-            ;;
-        5)
-            info_message "Sortie du menu."
-            exit 0
-            ;;
-        *)
-            error_message "Option invalide, veuillez réessayer."
-            ;;
+        1) check_permission "$SCRIPT_UTILISATEURS" && bash "$SCRIPT_UTILISATEURS" ;;
+        2) check_permission "$SCRIPT_SURVEILLANCE" && bash "$SCRIPT_SURVEILLANCE" ;;
+        3) check_permission "$SCRIPT_CRON" && bash "$SCRIPT_CRON" ;;
+        4) check_permission "$SCRIPT_SAUVEGARDE" && bash "$SCRIPT_SAUVEGARDE" ;;
+        5) check_permission "$SCRIPT_JOURNALISATION" && bash "$SCRIPT_JOURNALISATION" ;;
+        6) info_message "Sortie du menu." ; exit 0 ;;
+        *) error_message "Option invalide, veuillez réessayer." ;;
     esac
 
-    read -p "Appuyez sur Entrée pour continuer..."
+    read -r -p "Appuyez sur Entrée pour continuer..."
 done
