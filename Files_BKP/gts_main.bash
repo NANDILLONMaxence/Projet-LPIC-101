@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#  permet de se déplacer dans le répertoire du script
+cd "$(dirname "$0")"
+
 # === Définition des couleurs ===
 color_B="\033[1;34m"  # Bleu clair
 color_W="\033[1;37m"  # Blanc clair
@@ -56,7 +59,7 @@ while true; do
     show_option "3. Gestion des taches avec cron"  
     show_option "4. Gestion des sauvegardes" 
     show_option "5. Gestion de la journalisation"
-    show_option "5. Quitter"
+    show_option "6. Quitter"
     echo
     read -r -p "Sélectionnez une option : " CHOIX
 
