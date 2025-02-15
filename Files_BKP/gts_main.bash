@@ -1,7 +1,10 @@
 #!/bin/bash
 
-#  permet de se déplacer dans le répertoire du script
-cd "$(dirname "$0")"
+#  permet de changer le répertoire de travail vers le répertoire du script
+if ! cd "$(dirname "$0")"; then
+    error_message "Erreur : Impossible de changer le répertoire vers $(dirname "$0")" >&2
+    exit 1
+fi
 
 # === Définition des couleurs ===
 color_B="\033[1;34m"  # Bleu clair
