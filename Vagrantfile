@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
     vb.memory = "2048"
     vb.cpus = 2
 
-    # === Add data disk (50GB) ===
+    # === Add data disk 10GB) ===
     unless File.exist?("./data_disk.vdi")
       vb.customize ["createhd", "--filename", "./data_disk.vdi", "--variant", "Fixed", "--size", 10 * 1024]
     end
@@ -97,7 +97,9 @@ Vagrant.configure("2") do |config|
       %IT  ALL=(ALL:ALL) ALL
       %RH  ALL=(ALL) NOPASSWD: /usr/sbin/setquota' | tee -a /etc/sudoers
 
-
+      # Création d'un lien symbolique pour rendre gts_main.bash accessible depuis n'importe quel répertoire
+      sudo ln -s /etc/gts/gts_main.bash /usr/local/bin/gts_main
+      
       # add perm sudo permission journa
       # === Add users ===
       adduser --gecos "" --disabled-password adminesgi
@@ -149,7 +151,7 @@ Vagrant.configure("2") do |config|
       permit nopass :IT cmd repquota
 
       # === Autoriser root à exécuter des commandes sans mot de passe ===
-      permit nopass root' > /etc/doas.conf
+      #permit nopass root' > /etc/doas.conf
       
       # === Enable password authentication for SSH ===
       sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config

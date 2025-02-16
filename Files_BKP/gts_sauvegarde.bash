@@ -87,6 +87,8 @@ planifier_sauvegarde() {
       CRON_CMD="$FREQUENCE cp -r $SOURCE $DEP_DIR"
       (crontab -l; echo "$CRON_CMD") | crontab -
       info_message "Tâche cron ajoutée avec succès : $CRON_CMD"
+      show_message "Attention si vous ne faites pas partie du département que vous avez donner,"
+      show_message "La tache sera créer, mais ne pourra pas être exécuté."
     else
       error_message "Le fichier ou dossier spécifié n'existe pas."
     fi

@@ -31,11 +31,11 @@ info_message() {
 }
 
 # Chemins des scripts
-SCRIPT_UTILISATEURS="./gts_utilisateurs.bash"
-SCRIPT_SURVEILLANCE="./gts_surveillance.bash"
-SCRIPT_CRON="./gts_cron.bash"
-SCRIPT_SAUVEGARDE="./gts_sauvegarde.bash"
-SCRIPT_JOURNALISATION="./gts_journalisation.bash"
+SCRIPT_UTILISATEURS="/etc/gts/gts_utilisateurs.bash"
+SCRIPT_SURVEILLANCE="/etc/gts/gts_surveillance.bash"
+SCRIPT_CRON="/etc/gts/gts_cron.bash"
+SCRIPT_SAUVEGARDE="/etc/gts/gts_sauvegarde.bash"
+SCRIPT_JOURNALISATION="/etc/gts/gts_journalisation.bash"
 
 # Journalisation des erreurs
 LOG_FILE="/var/log/gts_menu.log"
