@@ -1,0 +1,28 @@
+L'erreur que vous rencontrez (`undefined method 'exists?' for class File (NoMethodError)`) est liée à une utilisation incorrecte de la méthode `exists?`, qui a été remplacée par `exist?` dans les versions récentes de Ruby. Voici les étapes pour résoudre ce problème :
+
+### Solution :
+1. **Mettre à jour la gem `vagrant-vbguest`** :
+   - Ouvrez une fenêtre de terminal.
+   - Mettez à jour la gem `vagrant-vbguest` en utilisant la commande suivante :
+     ```
+     vagrant plugin update vagrant-vbguest
+     ```
+
+2. **Modifier le code source (temporaire)** :
+   Si l'erreur persiste après la mise à jour de la gem, vous pouvez corriger le code en modifiant manuellement le fichier concerné dans le répertoire de la gem. Suivez ces étapes :
+   - Allez dans le répertoire de la gem `vagrant-vbguest` :
+     ```
+     cd C:/Users/maxma/.vagrant.d/gems/3.3.6/gems/vagrant-vbguest-0.32.0/lib/vagrant-vbguest/hosts
+     ```
+   - Ouvrez le fichier `virtualbox.rb` dans un éditeur de texte (par exemple, Notepad++ ou VSCode).
+   - Remplacez `File.exists?` par `File.exist?` à la ligne 84.
+   - Sauvegardez les modifications.
+
+3. **Redémarrer Vagrant** :
+   - Après avoir effectué les modifications, redémarrez votre machine virtuelle Vagrant :
+     ```
+     vagrant halt
+     vagrant up
+     ```
+
+Cela devrait corriger l'erreur liée à la méthode `exists?`.

@@ -48,7 +48,7 @@ check_permission() {
     else
         error_message "Accès refusé : Vous n'avez pas la permission d'exécuter $script"
         error_message "Cette tentative a été journalisée."
-        echo "$(date) - $(whoami) a tenté d'exécuter $script sans permission." | sudo tee -a "$LOG_FILE" > /dev/null
+        echo "$(date) - $(whoami) a tenté d'exécuter $script sans permission." | tee -a "$LOG_FILE" > /dev/null
         return 1  # Refusé
     fi
 }

@@ -55,6 +55,11 @@ Vagrant.configure("2") do |config|
       mkdir -p /etc/new_agents
       mkdir -p /etc/cron_script
 
+       # === Log files ===
+      mkdir -p /var/log/gts
+      touch /var/log/gts_menu.log
+      chmod 662 /var/log/gts_menu.log
+
       # === Add files/folders ===
       touch /etc/new_agents/new_agents.txt
       cp -r /vagrant/Files_BKP /home/vagrant/Files_BKP
