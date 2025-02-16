@@ -63,8 +63,7 @@ while true; do
 					read -r -p "Entrez le chemin de votre fichier : " chemin
 					cmd="rm $chemin" ;;
 				3)
-					read -r -p "Entrez votre commande personnalisée : " cmd
-					read -r -p "Votre fréquence (ex. * * * * *): " schedule ;;
+					read -r -p "Entrez votre commande personnalisée : " cmd ;;
 				4)
 					show_message "Retour au menu principal." ; continue ;;
 	
@@ -73,7 +72,7 @@ while true; do
 			esac
 
 			# Si l'utilisateur a choisi une commande autre que les options 3 ou 4, demander la fréquence
-			if [ "$commande" -ne 1 ] && [ "$commande" -ne 3 ]; then
+			if [ "$commande" -ne 1 ] && [ "$commande" -ne 4 ]; then
 				# Propose des horaires courants
 				echo
 				show_message "=== Fréquences disponibles ==="

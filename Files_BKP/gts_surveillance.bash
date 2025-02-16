@@ -45,10 +45,10 @@ launch_htop() {
 list_processes() {
     show_message "=== Suivi des processus actifs ==="
     info_message "Resumer processus par utilisation CPU :"
-    ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 11
+    ps -eo pid,comm,%cpu --sort=-%cpu | head -n 11
     echo
     info_message "Resumer processus par utilisation MEM :"
-    ps -eo pid,comm,%cpu,%mem --sort=-%mem | head -n 11
+    ps -eo pid,comm,%mem --sort=-%mem | head -n 11
     echo
 }
 

@@ -105,7 +105,7 @@ set_user_quota() {
                 info_message "Application du quota de $quota_size sur l'utilisateur : $username"
 
                 # Configuration du quota (assurez-vous que le système prend en charge les quotas (repquota -a))
-                if setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir"; then
+                if sudo setquota -u "$username" 0 "$quota_size" 0 0 "$home_dir"; then
                     info_message "Quota appliqué avec succès pour $username."
                 else    
                     error_message "Échec de l'application du quota."
