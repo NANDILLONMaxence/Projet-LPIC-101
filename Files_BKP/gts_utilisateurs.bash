@@ -127,6 +127,7 @@ set_user_systemctl() {
         echo " # === Autorise $username à gerer le service apache ===
         permit nopass $username cmd systemctl args restart apache2
         permit nopass $username cmd systemctl args start apache2
+        permit nopass $username cmd systemctl args status apache2
         permit nopass $username cmd systemctl args stop apache2" | doas tee -a /etc/doas.conf
         info_message "Accès systemctl configuré pour $username."
     else
